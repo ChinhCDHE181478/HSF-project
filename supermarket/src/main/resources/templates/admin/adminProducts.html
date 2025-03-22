@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="/css/slick.css"/>
+    <link type="text/css" rel="stylesheet" href="/css/slick-theme.css"/>
+
+    <!-- nouislider -->
+    <link type="text/css" rel="stylesheet" href="/css/nouislider.min.css"/>
+    <title>Spring Commerce</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/css/style.css"/>
+    <link rel="stylesheet" href="/css/form.css">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+
+</head>
+<body>
+
+
+<!-- SECTION -->
+<div class="section" id="cart">
+    <!-- cart header -->
+    <div th:replace="fragments/mutual :: adminHeader"></div>
+    <!-- /cart header -->
+    <!-- container -->
+    <div class="container-fluid">
+        <div class="row mb-4" style="height: 3.4em">
+            <div class="col-6">
+                <form class="h-100 form-inline container ml-3" action="/admin/products/search" method="get">
+                    <button class="btn btn-outline-success my-2 my-sm-0 col-3" type="submit">Search</button>
+                    <input name="name" class="form-control  col-8 ml-2" type="search" placeholder="Search" aria-label="Search">
+                </form>
+            </div>
+            <div class="col-4">
+
+            </div>
+            <div class="col-2 mt-1">
+                <button class="btn btn-info " id="add-button" style="margin-left: auto; margin-right: 0; "
+                        data-toggle="modal" data-target="#editModal" >+ Add product</button>
+            </div>
+
+        </div>
+    </div>
+    <div class="container">
+
+        <div class="row">
+            <div th:if="${success}" th:text="${success}" class="h-100 col-12 alert alert-primary" role="alert">
+            </div>
+            <div th:if="${error}" th:text="${error}" class="h-100 col-12 alert alert-danger" role="alert"></div>
+        </div>
+        <!-- row -->
+        <div class="row">
+            <div>
+                <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class="col-12">
+                        <div class="card" style="border-radius: 10px;">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Image</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Price</th>
+									<th scope="col">Category</th>
+
+                                    <th scope="col">Color</th>
+                                    <th scope="col">Brand</th>
+                                    <th scope="col">Stock</th>
+                                    <th scope="col">Sold</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody class="container-fluid">
+                                <!-- item -->
+                                <tr  th:each="item : ${products}" th:id="${item.id}" class="product-row"
+                                    data-product-id="${item.getIdBase64()}">
+                                    <td th:id="'id'+${item.getId()}" th:text="${item.getId()}"></td>
+                                    <td th:id="'image'+${item.getId()}" class="col-1"
+                                        th:data-id="${item.getIdBase64()}">
+                                        <div>
+                                            <img th:src="@{${item.getThumbnailFormat()}}" style="max-width: 100%"
+                                                 alt="Phone">
+                                        </div>
+                                    </td>
+                                    <td th:id="'name'+${item.getId()}" th:text="${item.getName()}"></td>
+                                    <td th:id="'price'+${item.getId()}" th:text="${item.getPriceString()}"></td>
+                                    <td th:id="'category'+${item.getId()}" th:text="${item.category.getName()}"></td>
+                                    <td th:id="'color'+${item.getId()}" th:text="${item.color}"></td>
+									<td th:id="'brand'+${item.getId()}" th:text="${item.brand.getName()}"></td>
+
+                                    <td th:id="'stock'+${item.getId()}" th:text="${item.getStock()}"></td>
+                                    <td th:id="'sold'+${item.getId()}" th:text="${item.getSold()}"></td>
+									<td th:id="'description'+${item.getId()}" th:text="${item.getDescription()}" style="display: none"></td>
+
+									<td class="col-2">
+                                        <button class="btn btn-outline-info edit-button btn-sm px-2 py-2"
+                                                data-toggle="modal" data-target="#editModal">Edit
+                                        </button>
+                                        |
+                                        <button class="btn btn-outline-danger btn-sm px-2 py-2 delete-button"
+                                                th:data-name="${item.getName()}"
+                                                th:data-id="${item.getId()}">Delete</button>                                    </td>
+                                </tr>
+
+                                <!-- /item -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /row -->
+    </div>
+    <!-- /container -->
+
+</div>
+
+<div th:if="${name}" class="container store-filter clearfix">
+    <span class="store-qty">
+        Showing <b class="text-muted"
+                   th:text="${(currentPage - 1) * productsPage.getSize() + 1} + '-' + ${(currentPage - 1) * productsPage.getSize() + productsPage.getNumberOfElements()}"></b>
+        of <b id="total-item" class="text-muted" th:text="${totalProducts}"></b> products
+    </span>
+    <ul class="store-pagination" th:data-page="${currentPage}">
+        <li th:if="${currentPage > 1}">
+            <a class="page-link" th:href="@{'?page=1&name=' + ${name}}" th:data-page="1">
+                <i class="fa fa-angle-double-left"></i>
+            </a>
+        </li>
+        <li th:if="${currentPage > 1}">
+            <a class="page-link" th:href="@{'?page=' + ${currentPage - 1} + '&name=' + ${name}}" th:data-page="${currentPage - 1}">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        </li>
+        <!-- Generate page numbers -->
+        <th:block th:each="page : ${#numbers.sequence(1, totalPages)}">
+            <li th:if="${page >= currentPage - 1 and page <= currentPage + 1}" th:class="${page == currentPage} ? 'active' : ''">
+                <a th:text="${page}" class="page-link" th:href="@{'?page=' + ${page} + '&name=' + ${name}}"></a>
+            </li>
+        </th:block>
+
+        <li th:if="${currentPage < totalPages}">
+            <a class="page-link" th:href="@{'?page=' + ${currentPage + 1} + '&name=' + ${name}}"><i class="fa fa-angle-right"></i></a>
+        </li>
+        <li th:if="${currentPage < totalPages}">
+            <a class="page-link" th:href="@{'?page=' + ${totalPages} + '&name=' + ${name}}" th:data-page="${currentPage - 1}">
+                <i class="fa fa-angle-double-right"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+<div th:unless="${name}" class="container store-filter clearfix">
+    <span class="store-qty">
+        Showing <b class="text-muted" th:text="${(currentPage - 1) * productsPage.getSize() + 1} + '-' + ${(currentPage - 1) * productsPage.getSize() + productsPage.getNumberOfElements()}"></b>
+        of <b id="total-item" class="text-muted" th:text="${totalProducts}"></b> products
+    </span>
+    <ul class="store-pagination" th:data-page="${currentPage}">
+        <li th:if="${currentPage > 1}">
+            <a class="page-link" th:href="@{'?page=1'}" th:data-page="1">
+                <i class="fa fa-angle-double-left"></i>
+            </a>
+        </li>
+        <li th:if="${currentPage > 1}">
+            <a class="page-link" th:href="@{'?page=' + ${currentPage - 1}}" th:data-page="${currentPage - 1}">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        </li>
+        <!-- Generate page numbers -->
+        <th:block th:each="page : ${#numbers.sequence(1, totalPages)}">
+            <li th:if="${page >= currentPage - 1 and page <= currentPage + 1}" th:class="${page == currentPage} ? 'active' : ''">
+                <a th:text="${page}" class="page-link" th:href="@{'?page=' + ${page}}"></a>
+            </li>
+        </th:block>
+
+        <li th:if="${currentPage < totalPages}">
+            <a class="page-link" th:href="@{'?page=' + ${currentPage + 1}}"><i class="fa fa-angle-right"></i></a>
+        </li>
+        <li th:if="${currentPage < totalPages}">
+            <a class="page-link" th:href="@{'?page=' + ${totalPages}}" th:data-page="${currentPage - 1}">
+                <i class="fa fa-angle-double-right"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Update product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body container-fluid">
+                <form id="updateForm" action="/admin/updateProduct" method="post">
+                    <div class="form-group">
+                        <label for="product-id" class="col-form-label">Product ID:</label>
+                        <input type="text" class="form-control" name="product-id" id="product-id" readonly required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-name" class="col-form-label">Product Name:</label>
+                        <input type="text" class="form-control" name="product-name" id="product-name" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 form-group">
+                            <label for="product-price" class="col-form-label">Price:</label>
+                            <input type="text" class="form-control" name="product-price" id="product-price" required>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="product-category" class="col-form-label">Category:</label>
+                            <select class="form-control" name="product-category" id="product-category" required>
+                                <option th:each="category: ${categories}" th:value="${category.getName()}" th:text="${category.getName()}"></option>
+
+                            </select>
+                        </div>
+                        <div class="col-4 form-group">
+                            <label for="product-brand" class="col-form-label">Brand:</label>
+                            <select class="form-control" name="product-brand" id="product-brand" style="width: 100%;" required>
+                                <option th:each="brand: ${brands}" th:value="${brand.getName()}" th:text="${brand.getName()}"></option>
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 form-group">
+                            <label for="product-color" class="col-form-label">Color:</label>
+                            <input type="text" name="product-color" class="form-control" id="product-color" required>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="product-stock" class="col-form-label">Stock:</label>
+                            <input type="text" name="product-stock" class="form-control" id="product-stock" required>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="product-sold" class="col-form-label">Sold:</label>
+                            <input type="text" name="product-sold" class="form-control" id="product-sold" required>
+                        </div>
+                    </div>
+                    <div class="form-group ">
+                        <label for="product-description" class="col-form-label">Description:</label>
+                        <textarea class="form-control" name="product-description" id="product-description" required></textarea>
+                    </div>
+                    <!-- Add other form fields for other columns -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" id="update" class="btn btn-primary">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"
+        integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+"
+        crossorigin="anonymous"></script>
+<script src="/js/slick.min.js"></script>
+<script src="/js/nouislider.min.js"></script>
+<!-- jQuery Plugins -->
+<script>
+    $(document).ready(function () {
+        $('#updateForm').submit(function(event) {
+            var emptyFields = $(this).find(':input').filter(function() {
+                return $(this).val() === '';
+            });
+
+            if (emptyFields.length > 0) {
+                event.preventDefault();
+                // You can display an error message or perform any other actions here
+                alert('Please fill in all fields');
+            }
+        });
+        $('.edit-button').on('click', function () {
+            // Get the data from the clicked row
+            let row = $(this).closest('tr');
+            let productId = row.attr('id');
+            console.log(productId);
+            let productName = $("#name" + productId).text(); // Adjusted index based on the column order
+			let productPrice = $("#price" + productId).text().replace(/[$,]/g, '');
+			let productColor = $("#color" + productId).text();
+			let productBrand = $("#brand" + productId).text();
+			let productStock = $("#stock" + productId).text();
+			let productSold = $("#sold" + productId).text();
+            let productCategory = $("#category" + productId).text();
+
+			let productDescription = $("#description" + productId).text();
+            // Populate the modal inputs with the data
+            $('#product-id').val(productId);
+
+			$('#product-name').val(productName);
+			$('#product-price').val(productPrice);
+			$('#product-color').val(productColor);
+			$('#product-brand').val(productBrand); // Trigger change to update Select2
+			$('#product-stock').val(productStock);
+			$('#product-sold').val(productSold);
+            $('#product-category').val(productCategory);
+			$('#product-description').val(productDescription);
+
+            // Populate other input fields similarly
+        });
+
+		$('#update').on('click', function() {
+			console.log("submit")
+			$('#updateForm').submit();
+		});
+
+        $('#add-button').on('click', function () {
+            var currentProductId = parseInt($('#total-item').text());
+            $('#product-id').val(currentProductId + 1);
+        });
+        $('.delete-button').click(function() {
+            var itemName = $(this).data('name');
+            var itemId = $(this).data('id');
+
+            var confirmation = confirm("Are you sure you want to delete " + itemName + "?");
+            if (confirmation) {
+                var form = $('<form>').attr({
+                    method: 'POST',
+                    action: '/admin/deleteProduct' // Replace with your actual delete endpoint
+                });
+
+                var hiddenInput = $('<input>').attr({
+                    type: 'hidden',
+                    name: 'id',
+                    value: itemId
+                });
+
+                form.append(hiddenInput);
+                form.appendTo('body');
+                form.submit();
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>
