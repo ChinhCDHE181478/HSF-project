@@ -42,6 +42,7 @@ public class CartService {
         cart.addToCart(product, quantity);
         return cartRepository.save(cart);
     }
+
     public  Cart addProductToCart(String accEmail, Long productId, int qty){
         Account account = accountService.getAccount(accEmail);
         Product product = productService.getProductById(productId);
