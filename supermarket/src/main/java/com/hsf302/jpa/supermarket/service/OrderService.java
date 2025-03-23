@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class OrderService {
@@ -30,5 +33,14 @@ public class OrderService {
 
     public Page<Order> getOrdersByStatus(String status, int page) {
         return orderRepository.findByStatus(status, PageRequest.of(page, 10));
+    }
+
+    public List<Order> getOrderByTxn(String txn) {
+        return orderRepository.getOrdersByVnpTxnRef(txn);
+    }
+
+    @Transactional
+    public void deleteOrder(Long id) {
+        orderRepository.deleteById(id);
     }
 }

@@ -35,11 +35,16 @@ $(document).ready(function () {
                 success: function(response) {
                     if (response.status === 200) {
                         let $dia = $("#message-dialog");
-                        $dia.find(".modal-body").text(response.message);
-                        $dia.modal("show");
-                        setTimeout(function() {
-                            window.location.href = "/order/success";
-                        }, 2000);
+                        let res = response.message;
+                        if (res.startsWith("http")) {
+                            window.location.href = res;
+                        } else {
+                            $dia.find(".modal-body").text(response.message);
+                            $dia.modal("show");
+                            setTimeout(function() {
+                                window.location.href = "/order/success";
+                            }, 2000);
+                        }
                     }
                     else {
                         let $dia = $("#message-dialog");

@@ -1,6 +1,7 @@
 package com.hsf302.jpa.supermarket.controller;
 
 import com.hsf302.jpa.supermarket.DTO.ResponseMessage;
+import com.hsf302.jpa.supermarket.config.VNPayConfig;
 import com.hsf302.jpa.supermarket.model.*;
 import com.hsf302.jpa.supermarket.service.*;
 import jakarta.annotation.Nullable;
@@ -13,6 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,13 +28,21 @@ public class OrderController {
     final AccountService accountService;
     final OrderService orderService;
     final ProductService productService;
-    final String[] paymentMethods = {"COD", "Bank transfer"};
+    final String[] paymentMethods = {"COD", "VNPay"};
+    final VNPayService vnPayService;
     @Autowired
-    public OrderController(CartService cartService, AccountService accountService, OrderService orderService, ProductService productService) {
+    public OrderController( VNPayService vnPayService ,CartService cartService, AccountService accountService, OrderService orderService, ProductService productService) {
         this.cartService = cartService;
         this.accountService = accountService;
         this.orderService = orderService;
         this.productService = productService;
+        this.vnPayService = vnPayService;
+    }
+
+    private static final double EXCHANGE_RATE = 25000.0; // Tỷ giá USD -> VNĐ (cập nhật theo thực tế)
+
+    public static long convertUsdToVnd(double usd) {
+        return Math.round(usd * EXCHANGE_RATE);
     }
 
     @GetMapping("/success")
@@ -59,11 +71,12 @@ public class OrderController {
         model.addAttribute("navActive", "order");
         return "order-detail";
     }
+
     @PostMapping("/checkout")
     ResponseEntity<ResponseMessage<String>> checkout(@Nullable @SessionAttribute(value = "accEmail", required = false) String email,
                                                      @RequestBody Map<String, Object> body,
                                                      @Nullable @SessionAttribute(value = "sCart", required = false) Cart sCart,
-                                                     HttpServletRequest request){
+                                                     HttpServletRequest request) throws UnsupportedEncodingException {
         if (email == null) {
             return ResponseEntity.ok((new ResponseMessage<>(Response.SC_UNAUTHORIZED, "Please reload and try again")));
         }
@@ -73,6 +86,7 @@ public class OrderController {
         String phone = (String) body.get("phone");
         String address = body.get("address") + ", " + (body.get("city") == null ? "" : (String) body.get("city")) + ", " + ((String) body.get("country") == null ? "" : (String) body.get("country"));
         String note = body.get("note") == null ? "" : (String) body.get("note");
+        String paymentMethod = paymentMethods[Integer.parseInt(body.get("paymentMethod").toString())-1];
         if (name == null || phone == null || address.length() < 10) {
             return ResponseEntity.ok((new ResponseMessage<>(Response.SC_BAD_REQUEST, "Please fill in all required fields")));
         }
@@ -94,9 +108,12 @@ public class OrderController {
             product.setSold(product.getSold() + qty);
             productService.saveProduct(product);
         }
+        String txn = null;
+        if(!paymentMethod.equals("COD")) {
+            txn = VNPayConfig.getRandomNumber(8);
+        }
         accountService.updateAddress(email, address);
-        String paymentMethod = paymentMethods[Integer.parseInt(body.get("paymentMethod").toString())-1];
-        order.setData(name, phone, address, note, paymentMethod, "Pending");
+        order.setData(name, phone, address, note, paymentMethod, "Pending", txn, null, null, null);
         Order newOrder = orderService.saveOrder(order);
 
         // set with new items list
@@ -107,6 +124,12 @@ public class OrderController {
         cartService.saveCart(cart);
         request.getSession().setAttribute("orderId", newOrder.getId());
         request.getSession().setAttribute("sCart", cart);
+
+        if(!paymentMethod.equals("COD")) {
+            Long amount = convertUsdToVnd(order.getTotalPrice());
+            String url = vnPayService.createPaymentUrl(txn, amount, request);
+            return ResponseEntity.ok((new ResponseMessage<>(Response.SC_OK, url)));
+        }
         return ResponseEntity.ok((new ResponseMessage<>(Response.SC_OK, "Checkout successfully")));
     }
 
@@ -141,6 +164,33 @@ public class OrderController {
         }
 
         return "redirect:/order/tracking?orderId=" + orderId;
+    }
+
+    @GetMapping("/after-payment")
+    public String afterPayment(
+                               @RequestParam Map<String, String> params) {
+        // Kiểm tra trạng thái giao dịch
+        String vnp_ResponseCode = params.get("vnp_ResponseCode");
+        String vnp_BankTranNo = params.get("vnp_BankTranNo");
+        String vnp_TransactionNo = params.get("vnp_TransactionNo");
+        String vnp_PayDate = params.get("vnp_PayDate");
+        String vnp_TxnRef = params.get("vnp_TxnRef");
+        LocalDateTime payDateTime = LocalDateTime.parse(vnp_PayDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+
+        Order p = orderService.getOrderByTxn(vnp_TxnRef).get(0);
+        Long id = p.getId();
+        // Xử lý logic kiểm tra thành công hay thất bại
+        if ("00".equals(vnp_ResponseCode)) {
+            p.setPaymentAt(payDateTime);
+            p.setVnpBankTranNo(vnp_BankTranNo);
+            p.setVnpTransactionNo(vnp_TransactionNo);
+            orderService.saveOrder(p);
+        } else {
+            // Thanh toán thất bại hoặc bị hủy
+            orderService.deleteOrder(p.getId());
+        }
+
+        return "redirect:/order/success"; // Điều hướng về trang xác nhận đơn hàng
     }
 
 }
