@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -94,7 +95,7 @@ public class OrderController {
         }
         accountService.updateAddress(email, address);
         String paymentMethod = paymentMethods[Integer.parseInt(body.get("paymentMethod").toString())-1];
-        order.setData(name, phone, address, note, paymentMethod, "pending");
+        order.setData(name, phone, address, note, paymentMethod, "Pending");
         Order newOrder = orderService.saveOrder(order);
 
         // set with new items list
@@ -107,4 +108,38 @@ public class OrderController {
         request.getSession().setAttribute("sCart", cart);
         return ResponseEntity.ok((new ResponseMessage<>(Response.SC_OK, "Checkout successfully")));
     }
+
+    @GetMapping("/tracking")
+    String trackOrder(@RequestParam Long orderId,
+                      @Nullable @SessionAttribute(value = "isLogin", required = false) Boolean isLogin,
+                      Model model) {
+        Order order = orderService.getOrder(orderId);
+
+        if (isLogin == null || !isLogin) {
+            model.addAttribute("isLogin", false);
+        } else {
+            model.addAttribute("isLogin", true);
+        }
+        if (order == null) {
+            System.out.println("Order not found!");
+            return "redirect:/";
+        }
+        model.addAttribute("order", order);
+        System.out.println("Order name: " + order.getName());
+
+        return "order-tracking";
+    }
+
+    @PostMapping("/update-status")
+    public String updateOrderStatus(@RequestParam Long orderId, @RequestParam String status) {
+        Order order = orderService.getOrder(orderId);
+
+        if (order != null) {
+            order.setStatus(status);
+            orderService.saveOrder(order);
+        }
+
+        return "redirect:/order/tracking?orderId=" + orderId;
+    }
+
 }

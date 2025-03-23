@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-    <title>Electro</title>
+    <title>TechZone</title>
 
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -165,7 +165,9 @@
                             <tbody>
                             <tr th:each="order, iterStat : ${user.orders}">
                                 <td th:text="${iterStat.count}"></td>
-                                <td class="view-product"><a href="#" th:text="${order.id}"></a></td>
+                                <td class="view-product">
+                                    <a th:href="'http://localhost:8080/order/tracking?orderId=' + ${order.id}" th:text="${order.id}"></a>
+                                </td>
                                 <td th:text="${order.getOrderDate()}"></td>
                                 <td th:text="${order.getItems().size()}"></td>
                                 <td th:text="${order.getToltalPriceString()}"></td>

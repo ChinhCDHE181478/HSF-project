@@ -4,12 +4,11 @@
         <div id="top-header">
             <div class="container">
                 <ul class="header-links pull-left">
-                    <li><a href="#"><i class="fa fa-phone"></i> +021-95-51-84</a></li>
-                    <li><a href="#"><i class="fa fa-envelope-o"></i> email@email.com</a></li>
-                    <li><a href="#"><i class="fa fa-map-marker"></i> 1734 Stonecoal Road</a></li>
+                    <li><a href="#"><i class="fa fa-phone"></i>038 685 2628</a></li>
+                    <li><a href="#"><i class="fa fa-envelope-o"></i> techzone@email.com</a></li>
+                    <li><a href="#"><i class="fa fa-map-marker"></i>Đại học FPT - Khu công nghệ cao Hòa Lạc</a></li>
                 </ul>
                 <ul class="header-links pull-right">
-                    <li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
                     <li><a href="/account"><i class="fa fa-user-o"></i> My Account</a></li>
                 </ul>
             </div>
@@ -198,12 +197,12 @@
                 <div class="row">
                     <div class="col-md-3 col-xs-6">
                         <div class="footer">
-                            <h3 class="footer-title">About Us</h3>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.</p>
+                            <h3 class="footer-title">About Us - TechZone</h3>
+                            <p>At TechZone, we bring you the best smartphones, laptops, and accessories at great prices. Stay connected with top-quality tech and enjoy an excellent shopping experience!</p>
                             <ul class="footer-links">
-                                <li><a href="#"><i class="fas fa-map-marker-alt"></i>1734 Stonecoal Road</a></li>
-                                <li><a href="#"><i class="fas fa-phone"></i>+021-95-51-84</a></li>
-                                <li><a href="#"><i class="fas fa-envelope"></i>email@email.com</a></li>
+                                <li><a href="#"><i class="fas fa-map-marker-alt"></i>Đại học FPT - Khu công nghệ cao Hòa Lạc</a></li>
+                                <li><a href="#"><i class="fas fa-phone"></i>038 685 2628</a></li>
+                                <li><a href="#"><i class="fas fa-envelope"></i>techzone@email.com</a></li>
                             </ul>
                         </div>
                     </div>
@@ -215,7 +214,6 @@
                                 <li><a href="#">Hot deals</a></li>
                                 <li><a href="#">Laptops</a></li>
                                 <li><a href="#">Smartphones</a></li>
-                                <li><a href="#">Cameras</a></li>
                                 <li><a href="#">Accessories</a></li>
                             </ul>
                         </div>
@@ -240,10 +238,10 @@
                         <div class="footer">
                             <h3 class="footer-title">Service</h3>
                             <ul class="footer-links">
-                                <li><a href="#">My Account</a></li>
-                                <li><a href="#">View Cart</a></li>
-                                <li><a href="#">Wishlist</a></li>
-                                <li><a href="#">Track My Order</a></li>
+                                <li><a href="http://localhost:8080/account">My Account</a></li>
+                                <li><a href="http://localhost:8080/cart">View Cart</a></li>
+                                <li><a href="http://localhost:8080/account/wishlist">Wishlist</a></li>
+                                <li><a href="http://localhost:8080/account">Track My Order</a></li>
                                 <li><a href="#">Help</a></li>
                             </ul>
                         </div>
@@ -270,9 +268,7 @@
                             <li><a href="#"><i class="fab fa-cc-amex"></i></a></li>
                         </ul>
                         <span class="copyright">
-								<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-								Helo moi nguoi toi la TechZone
-                            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+								© 2025 TechZone. All rights reserved.
 							</span>
 
 
@@ -296,7 +292,7 @@
                 </a>
             </div>
         </div>
-    </div>
+    </div>E
     <hr style="color:black;width:100%">
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light d-flex justify-content-center">
@@ -307,9 +303,6 @@
         <!--		<div class="navbar-collapse responsive-nav" id="navbarNav">-->
         <div class="responsive-nav" id="navbarNav">
             <ul class="main-nav nav navbar-nav">
-                <li class="nav-item mx-4" th:class="${#strings.equals(session.adminPage, 'Products')} ? 'active' : ''">
-                    <a class="" href="/admin/products">Products</a>
-                </li>
                 <li class="nav-item mx-4" th:class="${#strings.equals(session.adminPage, 'Users')} ? 'active' : ''">
                     <a class="" href="/admin/users">Users</a>
                 </li>
@@ -318,6 +311,12 @@
                 </li>
                 <li class="nav-item mx-4" th:class="${#strings.equals(session.adminPage, 'Categories')} ? 'active' : ''">
                     <a class="" href="/admin/categories">Categories</a>
+                </li>
+                <li class="nav-item mx-4" th:class="${#strings.equals(session.adminPage, 'Products')} ? 'active' : ''">
+                    <a class="" href="/admin/products">Products</a>
+                </li>
+                <li class="nav-item mx-4" th:class="${#strings.equals(session.adminPage, 'Orders')} ? 'active' : ''">
+                    <a class="" href="/admin/orders">Orders</a>
                 </li>
             </ul>
 

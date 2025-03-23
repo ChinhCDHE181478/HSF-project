@@ -18,16 +18,19 @@ public class AdminController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final BrandService brandService;
+    private final OrderService orderService;
     final CartService cartService;
     final AccountService accountService;
 
-    public AdminController(ProductService productService, CategoryService categoryService, BrandService brandService, CartService cartService, AccountService accountService) {
+    public AdminController(ProductService productService, CategoryService categoryService, BrandService brandService, CartService cartService, AccountService accountService, OrderService orderService) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.brandService = brandService;
         this.cartService = cartService;
         this.accountService = accountService;
+        this.orderService = orderService;
     }
+
 
     @GetMapping("/products")
     public String getProductAdmin(@SessionAttribute(value = "isLogin", required = false) Boolean isLogin,
@@ -353,6 +356,60 @@ public class AdminController {
         }
 
         return "redirect:/admin/categories";
+    }
+
+    @GetMapping("/orders")
+    public String getOrders(@SessionAttribute(value = "isLogin", required = false) Boolean isLogin,
+                            @RequestParam(name = "page", required = false) Integer page,
+                            @RequestParam(name = "status", required = false) String status,
+                            Model model, HttpSession session) {
+        if (isLogin == null || !isLogin) {
+            model.addAttribute("isLogin", false);
+        } else {
+            model.addAttribute("isLogin", true);
+        }
+        if (page == null) {
+            page = 1;
+        }
+
+        Page<Order> orderPage;
+        if (status == null || status.isEmpty()) {
+            orderPage = orderService.getAllOrders(page - 1);
+        } else {
+            orderPage = orderService.getOrdersByStatus(status, page - 1);
+        }
+
+        model.addAttribute("orderPage", orderPage);
+        model.addAttribute("status", status); // Giữ lại trạng thái đã chọn trên giao diện
+        model.addAttribute("success", session.getAttribute("success"));
+        model.addAttribute("error", session.getAttribute("error"));
+        model.addAttribute("totalPages", orderPage.getTotalPages());
+        model.addAttribute("currentPage", page);
+        session.setAttribute("adminPage", "Orders");
+        session.removeAttribute("success");
+        session.removeAttribute("error");
+        return "admin/adminOrders";
+    }
+
+
+    @PostMapping("/updateOrderStatus")
+    public String updateOrderStatus(@RequestParam(name = "orderId") Long orderId,
+                                    @RequestParam(name = "status") String status,
+                                    HttpSession session) {
+        try {
+            Order order = orderService.getOrder(orderId);
+            if (order != null) {
+                order.setStatus(status);
+                orderService.saveOrder(order); // Lưu đơn hàng với trạng thái mới
+                session.setAttribute("success", "Order status updated successfully.");
+            } else {
+                session.setAttribute("error", "Order not found.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            session.setAttribute("error", "Failed to update order status.");
+        }
+        return "redirect:/admin/orders"; // Chuyển hướng về trang quản lý đơn hàng
     }
 
 }

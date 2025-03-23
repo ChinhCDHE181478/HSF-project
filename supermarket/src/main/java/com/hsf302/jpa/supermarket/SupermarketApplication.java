@@ -9,10 +9,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
-
 @SpringBootApplication
 @EnableAsync
 public class SupermarketApplication implements CommandLineRunner {
@@ -20,18 +16,6 @@ public class SupermarketApplication implements CommandLineRunner {
     private AccountService accountService;
 
     public static void main(String[] args) {
-
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-
-        try {
-            ObjectName mbeanName = new ObjectName("org.springframework.boot:type=Admin,name=SpringApplication");
-            if (mbs.isRegistered(mbeanName)) {
-                mbs.unregisterMBean(mbeanName);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         SpringApplication.run(SupermarketApplication.class, args);
     }
 
